@@ -31,6 +31,8 @@ these are just messy notes to remind me whats going on
 
 - functions
 - macros
+  - non-aliased registers transparently offset above all registers used in a
+    function to prevent clashes
 - aliases
 - external functions
 - attributes
