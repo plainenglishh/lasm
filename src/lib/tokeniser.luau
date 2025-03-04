@@ -138,7 +138,6 @@ function tokeniser.tokenise(src: buffer): t.TokeniseResult
     end
 
 
-
     return {
         tokens = tokens,
         errors = errors,
