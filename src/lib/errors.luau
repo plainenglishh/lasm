@@ -17,7 +17,7 @@ errors.codes = {
     [1] = {
         name = "UnexpectedToken", 
         type = "SyntaxError", 
-        message = fmt("expected token %*, got %*") 
+        message = fmt("expected token %*, got %*"),
     },
 
     [2] = {

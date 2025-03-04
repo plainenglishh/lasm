@@ -36,7 +36,7 @@ end
 ]=]
 macro destroy_metatable!(val: register)
     LOADNIL R0; -- Non-alias macro identifiers don't conflict with the invoking protos registers
-    FASTCALL2 fastcall::setmetatable, val, L_ok, R0;
+    FASTCALL2 builtin::setmetatable, val, L_ok, R0;
     panic! "fastcalls not available";
     L_ok:
 end
@@ -45,7 +45,7 @@ end
 @[name("hello_world")]
 function F0()
         const K0 = S1;
-        const K1 = env.print;
+        const K1 = import::print;
  
         GETIMPORT R0, K1;
         destroy_metatable! R0;
