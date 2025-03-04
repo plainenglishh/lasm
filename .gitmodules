@@ -1,0 +1,3 @@
+[submodule "vendor/luau_toolkit"]
+	path = vendor/luau_toolkit
+	url = https://github.com/plainenglishh/luau-toolkit.git

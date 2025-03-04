@@ -1,0 +1,11 @@
+{
+    "languageMode": "strict",
+    "aliases": {
+        "vendor": "./vendor"
+    },
+    "typeErrors": true,
+    "lintErrors": false,
+    "lint": {
+        "LocalShadow": false
+    }
+}

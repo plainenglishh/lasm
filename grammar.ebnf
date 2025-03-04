@@ -1,0 +1,112 @@
+(* 
+    UpperCamelCase rules refer to Parser AST Nodes,
+    SCREAMING_SNAKE_CASE rules refer to Lexer Tokens,
+    snake_case rules are used for brevity and aren't emitted.
+*)
+
+(* TODO: Redo *)
+ 
+
+(* AST Nodes *)
+
+Chunk             = {ChunkAttribute | StringDef | FunctionDef | AliasDef | 
+                    MacroDef, ExternDef};
+
+StringDef         = STRING_KEYWORD IDENTIFIER EQ STRING_LITERAL SEMICOLON;
+
+ExternDef         = EXTERN_KEYWORD IDENTIFIER SEMICOLON;
+
+MacroDef          = macro_header {function_body} END_KEYWORD;
+macro_header      = MACRO_KEYWORD IDENTIFIER OPEN_PAREN [macro_argument] 
+                    {COMMA macro_argument} [COMMA] CLOSE_PAREN;
+macro_argument    = IDENTIFIER [COLON LASM_TYPE];
+
+FunctionDef       = function_header {function_body} END_KEYWORD;
+function_header   = {FunctionAttribute} FUNCTION_KEYWORD IDENTIFIER OPEN_PAREN 
+                    [Identifier] {COMMA Identifier} [COMMA ELLIPSIS] CLOSE_PAREN;
+function_body     = {Instruction | AliasDef | ConstDef};
+
+Instruction       = [label] IDENTIFIER [Value] {COMMA Value} [COMMA] SEMICOLON;
+Label             = Identifier COLON;
+
+AliasDef          = ALIAS_KEYWORD IDENTIFIER EQ Value SEMICOLON;
+
+ConstDef          = CONST_KEYWORD IDENTIFIER EQ Value SEMICOLON;
+
+FunctionAttribute = AT attribute_body;
+ChunkAttribute    = AT EXCLAIM attribute_body;
+attribute_body    = IDENTIFIER | OPEN_SBRACKET IDENTIFIER [EQ Literal]    
+                    CLOSE_SBRACKET;
+
+Value             = Identifier | Literal;
+
+Literal           = NIL_LITERAL    | BOOLEAN_LITERAL | STRING_LITERAL | 
+                    NUMBER_LITERAL | VECTOR_LITERAL  | IMPORT_LITERAL |  
+                    TABLE_LITERAL  ;
+
+Identifier        = IDENTIFIER {offset};
+offset            = (ADD | SUB | MUL | DIV) NUMBER_LITERAL;
+
+
+(* Tokens *)
+
+TABLE_LITERAL    = '{' {literal ','} '}';
+IMPORT_LITERAL   = IMPORT_KEYWORD '::' IDENTIFIER ['.' IDENTIFIER];
+FASTCALL_LITERAL = FASTCALL_KEYWORD '::' IDENTIFIER ['.' IDENTIFIER];
+VECTOR_LITERAL   = '<' [NUMBER_LITERAL] [COMMA NUMBER_LITERAL] 
+                   [COMMA NUMBER_LITERAL] [COMMA NUMBER_LITERAL]'>';
+NUMBER_LITERAL   = integer_literal | float_literal | hex_literal | bin_literal;
+STRING_LITERAL   = '"' any_char '"';
+BOOLEAN_LITERAL  = 'true' | 'false';
+NIL_LITERAL      = 'nil';
+
+FUNCTION_KEYWORD = 'function';
+ALIAS_KEYWORD    = 'alias';
+MACRO_KEYWORD    = 'macro';
+CONST_KEYWORD    = 'const';
+STRING_KEYWORD   = 'string';
+END_KEYWORD      = 'end';
+IMPORT_KEYWORD   = 'import';
+EXTERN_KEYWORD   = 'extern';
+FASTCALL_KEYWORD = 'fastcall';
+
+LASM_TYPE        = 'register' | 'function' | 'label' | 'constant' | 'string' |
+                   'extern';
+
+LUAU_TYPE        = ('nil' | 'boolean' | 'number' | '') ['?']
+
+IDENTIFIER       = (('$' | alpha) {alphanumeric}) | (alpha {alphanumeric} '!');
+
+OPEN_PAREN       = '(';
+CLOSE_PAREN      = ')';
+OPEN_SBRACKET    = '[';
+CLOSE_SBRACKET   = ']';
+AT               = '@';
+EXCLAIM          = '!';
+EQ               = '=';
+SEMICOLON        = ';';
+COLON            = ':';
+DOT              = '.';
+COMMA            = ',';
+ADD              = '+';
+SUB              = '-'; 
+MUL              = '*'; 
+DIV              = '/';
+ELLIPSIS         = '...';
+
+SINGLE_COMMENT   = '--' ? any character except newline ? NEWLINE; 
+MULTI_COMMENT    = '--[' {'='} '[' ? any character ? ']' {'='} ']'; (* Same amount of EQ required for both ends *)
+
+(* not emitted *)
+
+integer_literal = number;
+float_literal   = number '.' number;
+hex_literal     = ('0x' | '0X') (hex_digit | '_');
+bin_literal     = ('0b' | '0B') (bin_digit | '_');
+number          = numeric {numeric | '_'};
+bin_digit       = '0' | '1'; 
+hex_digit       = ? any hex digit ?;
+alpha_numeric   = alpha | digit;
+numeric         = ? any digit ?;
+alpha           = ? any letter ? | '_';
+any_char        = ? any character ?;

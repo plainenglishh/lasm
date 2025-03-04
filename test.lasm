@@ -1,0 +1,56 @@
+string S1 = "Hello, World!";
+
+extern E0; -- Declare external function ‘0’
+
+-- builtin aliases:
+--   _ = 0
+--   MULTIRET = -1
+
+--[=[
+    Returns a random number
+]=]
+@[name("rand")]
+function F_rand(arg1: number, ...) -- 1 nparam, yes isvararg, arg1 is alias for R0, arg2 for R1, so on so forth
+        GETIMPORT R0, _, import::math.random;
+        CALL R0, 1, 1;
+        RETURN R0, 0;
+end
+
+--[=[ 
+    Never returns
+]=]
+@[name("loop_forever")]
+function F_loop_forever()
+    L_start: 
+        JUMPBACK L_start;
+end
+
+macro panic!(msg: string)
+    GETIMPORT R0, _, import::error;
+    LOADK R1, msg;
+    CALL R0, 2, 1;
+end
+
+--[=[
+    Sets a values metatable to nil
+]=]
+macro destroy_metatable!(val: register)
+    LOADNIL R0; -- Non-alias macro identifiers don't conflict with the invoking protos registers
+    FASTCALL2 fastcall::setmetatable, val, L_ok, R0;
+    panic! "fastcalls not available";
+    L_ok:
+end
+
+@main
+@[name("hello_world")]
+function F0()
+        const K0 = S1;
+        const K1 = env.print;
+ 
+        GETIMPORT R0, K1;
+        destroy_metatable! R0;
+        LOADK R1, K0;
+        CALL R0, 2, 1;
+        RETURN 0,  1;
+end
+
