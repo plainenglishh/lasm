@@ -1,4 +1,4 @@
-# **L**uau Bytecode **As**se**m**bler (`LASM`)
+# __L__uau Bytecode __As__se__m__bler (`LASM`)
 
 An assembly-inspired language for creating custom Luau bytecode chunks.
 
