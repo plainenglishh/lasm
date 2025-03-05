@@ -1,7 +1,7 @@
 (* 
     UpperCamelCase rules refer to Parser AST Nodes,
     SCREAMING_SNAKE_CASE rules refer to Lexer Tokens,
-    snake_case rules are used for brevity and aren't emitted.
+    snake_case rules are used for brevity and aren't emitted as tokens or AST nodes.
 *)
 
 (* TODO: Redo *)
@@ -10,7 +10,7 @@
 (* AST Nodes *)
 
 Chunk             = {ChunkAttribute | StringDef | FunctionDef | AliasDef | 
-                    MacroDef, ExternDef};
+                    MacroDef | ExternDef};
 
 StringDef         = STRING_KEYWORD IDENTIFIER EQ STRING_LITERAL SEMICOLON;
 
@@ -23,8 +23,9 @@ macro_argument    = IDENTIFIER [COLON LASM_TYPE];
 
 FunctionDef       = function_header {function_body} END_KEYWORD;
 function_header   = {FunctionAttribute} FUNCTION_KEYWORD IDENTIFIER OPEN_PAREN 
-                    [Identifier] {COMMA Identifier} [COMMA ELLIPSIS] CLOSE_PAREN;
+                    [Identifier [COLON luau_type]] {COMMA Identifier [COLON luau_type]} [COMMA ELLIPSIS] CLOSE_PAREN;
 function_body     = {Instruction | AliasDef | ConstDef};
+luau_type         = LUAU_TYPE | NIL_LITERAL;
 
 Instruction       = [label] IDENTIFIER [Value] {COMMA Value} [COMMA] SEMICOLON;
 Label             = Identifier COLON;
@@ -40,9 +41,9 @@ attribute_body    = IDENTIFIER | OPEN_SBRACKET IDENTIFIER [EQ Literal]
 
 Value             = Identifier | Literal;
 
-Literal           = NIL_LITERAL    | BOOLEAN_LITERAL | STRING_LITERAL | 
-                    NUMBER_LITERAL | VECTOR_LITERAL  | IMPORT_LITERAL |  
-                    TABLE_LITERAL  ;
+Literal           = NIL_LITERAL    | BOOLEAN_LITERAL  | STRING_LITERAL  | 
+                    NUMBER_LITERAL | VECTOR_LITERAL   | IMPORT_LITERAL  |  
+                    TABLE_LITERAL  | MLSTRING_LITERAL | BUILTIN_LITERAL ;
 
 Identifier        = IDENTIFIER {offset};
 offset            = (ADD | SUB | MUL | DIV) NUMBER_LITERAL;
@@ -51,14 +52,14 @@ offset            = (ADD | SUB | MUL | DIV) NUMBER_LITERAL;
 (* Tokens *)
 
 TABLE_LITERAL    = '{' {literal ','} '}';
-IMPORT_LITERAL   = IMPORT_KEYWORD '::' IDENTIFIER ['.' IDENTIFIER];
-FASTCALL_LITERAL = FASTCALL_KEYWORD '::' IDENTIFIER ['.' IDENTIFIER];
-VECTOR_LITERAL   = '<' [NUMBER_LITERAL] [COMMA NUMBER_LITERAL] 
-                   [COMMA NUMBER_LITERAL] [COMMA NUMBER_LITERAL]'>';
+IMPORT_LITERAL   = 'import::' IDENTIFIER ['.' IDENTIFIER];
+VECTOR_LITERAL   = '<' [NUMBER_LITERAL] {COMMA NUMBER_LITERAL} [COMMA]'>';
 NUMBER_LITERAL   = integer_literal | float_literal | hex_literal | bin_literal;
 STRING_LITERAL   = '"' any_char '"';
+MLSTRING_LITERAL = '[' {'='} '[' any_char ']' {'='} ']';
 BOOLEAN_LITERAL  = 'true' | 'false';
 NIL_LITERAL      = 'nil';
+BUILTIN_LITERAL  = 'builtin::' IDENTIFIER ['.' IDENTIFIER];
 
 FUNCTION_KEYWORD = 'function';
 ALIAS_KEYWORD    = 'alias';
@@ -66,16 +67,14 @@ MACRO_KEYWORD    = 'macro';
 CONST_KEYWORD    = 'const';
 STRING_KEYWORD   = 'string';
 END_KEYWORD      = 'end';
-IMPORT_KEYWORD   = 'import';
 EXTERN_KEYWORD   = 'extern';
-FASTCALL_KEYWORD = 'fastcall';
 
 LASM_TYPE        = 'register' | 'function' | 'label' | 'constant' | 'string' |
                    'extern';
 
-LUAU_TYPE        = ('nil' | 'boolean' | 'number' | '') ['?']
+LUAU_TYPE        = ('boolean' | 'number' | '') ['?'];
 
-IDENTIFIER       = (('$' | alpha) {alphanumeric}) | (alpha {alphanumeric} '!');
+IDENTIFIER       = (alpha {alphanumeric}) ['!'];
 
 OPEN_PAREN       = '(';
 CLOSE_PAREN      = ')';

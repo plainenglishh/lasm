@@ -1,15 +1,19 @@
-export type TokeniseResult = {
-    errors: {Error},
-    tokens: {Token},
-};
+local t = {};
 
 export type Span = {
     start: number,
     stop: number,
 };
 
+function t.Span(start: number, stop: number): Span
+    return {
+        start = start,
+        stop = stop,
+    };
+end
+
 export type TokenType = 
-    ""-- TODO!;
+    "ERROR"-- TODO!;
 
 export type Token = {
     type: TokenType,
@@ -18,20 +22,25 @@ export type Token = {
     literal: any?,
 };
 
-export type ErrorType = 
+export type CompileErrorType = 
     "SyntaxError";
 
-export type Error = {
-    type: ErrorType,
+export type CompileError = {
+    type: CompileErrorType,
     message: string,
     span: Span,
 };
 
-export type ErrorInfo = {
+export type CompileErrorInfo = {
     name: string,
-    type: ErrorType,
+    type: CompileErrorType,
     message: (...any) -> string,
 };
 
-local t = {};
+export type PeekableCharacterStream = {
+    peek: () -> string?,
+    next: () -> string?,
+    position: () -> number,
+};
+
 return t;
