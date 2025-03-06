@@ -1,4 +1,5 @@
 local t = require("../typedefs");
+local errors = require("./errors");
 
 type Tokeniser = {
     peek: () -> t.Token?,
@@ -33,7 +34,7 @@ function tokeniser.tokenise(char_stream: t.PeekableCharacterStream): Tokeniser
         end        
 
         local function ErrToken(name: string, ...): t.Token
-            return Token("ERROR");
+            return Token("ERROR", name, errors.get_message(name, ...));
         end
 
         local char = char_stream.next();
